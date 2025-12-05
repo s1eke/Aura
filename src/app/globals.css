@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+:root {
+  /* Warm Companion App Color Palette */
+  --primary-pink: #f4a7b9;
+  --primary-pink-light: #ffd4e0;
+  --primary-pink-dark: #e8809a;
+  --bg-warm: #fef9f8;
+  --bg-white: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #999999;
+  --text-tertiary: #cccccc;
+  --border-light: #f0f0f0;
+  --divider: #e8e8e8;
+
+  /* Message Bubble Colors */
+  --bubble-sent: #ffd4e0;
+  --bubble-received: #ffffff;
+  --bubble-text-sent: #333333;
+  --bubble-text-received: #333333;
+
+  /* Mobile-safe viewport height - fallback to 100vh, will be updated by JS */
+  --vh: 1vh;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg-warm);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+}
+
+/* WeChat-style scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Remove all default transitions */
+* {
+  transition: none !important;
+}
+
+/* WeChat-style inputs */
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Companion App List Item */
+.wechat-list-item {
+  background: var(--bg-white);
+  border-bottom: 0.5px solid var(--border-light);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+}
+
+.wechat-list-item:active {
+  background: var(--bg-warm);
+}
+
+/* Avatar */
+.wechat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--primary-pink-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  overflow: hidden;
+}
+
+/* Badge */
+.wechat-badge {
+  background: #ff6b9d;
+  color: white;
+  font-size: 12px;
+  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+/* Primary Button */
+.wechat-button {
+  background: var(--primary-pink);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 48px;
+  width: 100%;
+}
+
+.wechat-button:active {
+  background: var(--primary-pink-dark);
+}
+
+.wechat-button:disabled {
+  background: var(--text-tertiary);
+  color: white;
+}
+
+/* Safe area padding for notch devices */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Loading animation */
+@keyframes wechat-loading {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.wechat-loading {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--primary-pink);
+  border-radius: 50%;
+  animation: wechat-loading 0.8s linear infinite;
+}
