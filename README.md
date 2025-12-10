@@ -1,3 +1,5 @@
+![Aura](./public/aura.png)
+
 # Aura - AI 驱动的社交聊天平台
 
 Aura 是一个基于 Next.js 16 和 React 19 构建的客制化属性较强的 AI 聊天软件。
