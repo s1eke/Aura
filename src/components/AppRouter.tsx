@@ -13,6 +13,7 @@ import SettingsScreen from '@/screens/SettingsScreen';
 import EditProfileScreen from '@/screens/EditProfileScreen';
 import ApiSettingsScreen from '@/screens/ApiSettingsScreen';
 import BubbleSettingsScreen from '@/screens/BubbleSettingsScreen';
+import PersonaManagementScreen from '@/screens/PersonaManagementScreen';
 import NewPersonaScreen from '@/screens/NewPersonaScreen';
 import EditPersonaScreen from '@/screens/EditPersonaScreen';
 
@@ -49,6 +50,7 @@ function AppContent() {
                     <Route path="/me/settings" element={<SettingsScreen />} />
                     <Route path="/me/settings/api" element={<ApiSettingsScreen />} />
                     <Route path="/me/settings/bubble" element={<BubbleSettingsScreen />} />
+                    <Route path="/me/settings/personas" element={<PersonaManagementScreen />} />
 
                     <Route path="/personas" element={<Navigate to="/" replace />} />
                     <Route path="/personas/new" element={<NewPersonaScreen />} />

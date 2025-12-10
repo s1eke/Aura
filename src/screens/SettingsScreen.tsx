@@ -119,6 +119,31 @@ export default function SettingsScreen() {
                     </div>
                 </div>
 
+                {/* 角色管理 */}
+                <div
+                    onClick={() => navigate('/me/settings/personas')}
+                    style={{
+                        background: 'var(--bg-white)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '4px'
+                    }}>
+                        <span style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)' }}>角色管理</span>
+                        <span style={{ color: 'var(--text-tertiary)' }}>›</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        导出和备份角色数据
+                    </div>
+                </div>
+
                 {/* 朋友圈模式 */}
                 {!isLoading && (
                     <div

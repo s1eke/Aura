@@ -5,14 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faCamera } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faCamera, faFileImport } from '@fortawesome/free-solid-svg-icons';
 import { queryKeys } from '@/lib/query-client';
-import { showError } from '@/lib/modal';
+import { showError, showSuccess } from '@/lib/modal';
 
 export default function NewPersonaScreen() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const importFileInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -96,6 +97,72 @@ export default function NewPersonaScreen() {
         }
     };
 
+    const handleImportClick = () => {
+        importFileInputRef.current?.click();
+    };
+
+    const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset file input for re-import
+        e.target.value = '';
+
+        // Validate file type
+        if (!file.name.endsWith('.zip')) {
+            showError({
+                title: '文件类型错误',
+                content: '只支持ZIP文件，请选择导出的.zip文件',
+            });
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Create FormData for ZIP file upload
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Call import API
+            const res = await fetch('/api/personas/import', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || '导入失败');
+            }
+
+            const data = await res.json();
+
+            // Invalidate queries to refresh the list
+            queryClient.invalidateQueries({ queryKey: queryKeys.sessions });
+            queryClient.invalidateQueries({ queryKey: queryKeys.personas });
+
+            showSuccess({
+                title: '导入成功',
+                content: `角色 "${data.persona?.name || '未命名'}" 已成功导入`,
+                onOk: () => {
+                    if (data.sessionId) {
+                        navigate(`/chat/${data.sessionId}`);
+                    } else {
+                        navigate('/');
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Import error:', error);
+            showError({
+                title: '导入失败',
+                content: error instanceof Error ? error.message : '导入角色时发生错误，请检查文件格式',
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const SectionTitle = ({ children }: { children: React.ReactNode }) => (
         <div style={{
             fontSize: '13px',
@@ -138,7 +205,28 @@ export default function NewPersonaScreen() {
                     <FontAwesomeIcon icon={faChevronLeft} />
                 </button>
                 <h1 style={{ fontSize: '17px', fontWeight: '600' }}>创建角色</h1>
-                <div style={{ width: '18px' }} />
+                <button
+                    onClick={handleImportClick}
+                    disabled={loading}
+                    style={{
+                        border: 'none',
+                        background: 'none',
+                        fontSize: '18px',
+                        color: loading ? 'var(--text-tertiary)' : '#07c160',
+                        padding: 0,
+                        cursor: loading ? 'not-allowed' : 'pointer'
+                    }}
+                    title="导入角色"
+                >
+                    <FontAwesomeIcon icon={faFileImport} />
+                </button>
+                <input
+                    type="file"
+                    ref={importFileInputRef}
+                    onChange={handleImportFile}
+                    style={{ display: 'none' }}
+                    accept=".zip,application/zip"
+                />
             </div>
 
             <form onSubmit={handleSubmit} style={{ flex: 1, overflow: 'auto' }} className="hide-scrollbar">
