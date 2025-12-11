@@ -10,7 +10,7 @@ export default function SettingsScreen() {
     const navigate = useNavigate();
 
     // Use TanStack Query for cached user profile
-    const { data: userProfile, isLoading } = useUserProfile();
+    const { data: userProfile } = useUserProfile();
     const updateProfileMutation = useUpdateUserProfile();
 
     const momentMode = userProfile?.momentMode ?? false;
@@ -145,52 +145,50 @@ export default function SettingsScreen() {
                 </div>
 
                 {/* 朋友圈模式 */}
-                {!isLoading && (
-                    <div
-                        onClick={toggleMomentMode}
-                        style={{
-                            background: 'var(--bg-white)',
-                            borderRadius: '12px',
-                            padding: '16px',
-                            marginBottom: '12px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                        }}
-                    >
-                        <div>
-                            <div style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                朋友圈模式
-                            </div>
-                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                {momentMode ? '开启中：AI 只能看到动态内容，不包含互动' : '关闭中：AI 可以看到完整的动态互动'}
-                            </div>
+                <div
+                    onClick={toggleMomentMode}
+                    style={{
+                        background: 'var(--bg-white)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}
+                >
+                    <div>
+                        <div style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                            朋友圈模式
                         </div>
-
-                        {/* Switch Toggle */}
-                        <div style={{
-                            width: '48px',
-                            height: '28px',
-                            borderRadius: '14px',
-                            background: momentMode ? '#07c160' : '#e5e5e5',
-                            position: 'relative',
-                            transition: 'background 0.3s'
-                        }}>
-                            <div style={{
-                                width: '24px',
-                                height: '24px',
-                                borderRadius: '50%',
-                                background: 'white',
-                                position: 'absolute',
-                                top: '2px',
-                                left: momentMode ? '22px' : '2px',
-                                transition: 'left 0.3s',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                            }} />
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            {momentMode ? '开启中：AI 只能看到动态内容，不包含互动' : '关闭中：AI 可以看到完整的动态互动'}
                         </div>
                     </div>
-                )}
+
+                    {/* Switch Toggle */}
+                    <div style={{
+                        width: '48px',
+                        height: '28px',
+                        borderRadius: '14px',
+                        background: momentMode ? '#07c160' : '#e5e5e5',
+                        position: 'relative',
+                        transition: 'background 0.3s'
+                    }}>
+                        <div style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            background: 'white',
+                            position: 'absolute',
+                            top: '2px',
+                            left: momentMode ? '22px' : '2px',
+                            transition: 'left 0.3s',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                        }} />
+                    </div>
+                </div>
             </div>
 
             {/* 退出登录 */}
