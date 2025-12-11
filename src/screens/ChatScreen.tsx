@@ -40,6 +40,8 @@ export default function ChatScreen() {
     // Pagination state
     const [loadingMore, setLoadingMore] = useState(false);
 
+
+
     // Panel states
     const [showStickerPanel, setShowStickerPanel] = useState(false);
     const [showUploadPanel, setShowUploadPanel] = useState(false);
@@ -124,7 +126,9 @@ export default function ChatScreen() {
     };
 
     const loadMoreMessages = async () => {
-        if (loadingMore || !hasMoreMessages || !nextCursor || !id) return;
+        if (loadingMore || !hasMoreMessages || !nextCursor || !id) {
+            return;
+        }
 
         setLoadingMore(true);
         try {
@@ -132,10 +136,10 @@ export default function ChatScreen() {
             if (!response.ok) throw new Error('Failed to load more messages');
 
             const data = await response.json();
-            const newMessages = data.session.messages || [];
+            const olderMessages = data.session?.messages || [];
 
-            if (newMessages.length > 0) {
-                const messagesWithSessionId = newMessages.map((m: Message) => ({
+            if (olderMessages.length > 0) {
+                const messagesWithSessionId = olderMessages.map((m: Message) => ({
                     ...m,
                     sessionId: id,
                     status: ('isBlocked' in m && m.isBlocked) ? 'blocked' : ('status' in m ? m.status : 'sent')
@@ -144,8 +148,25 @@ export default function ChatScreen() {
                 // Save to IndexedDB
                 await saveMessages(messagesWithSessionId);
 
-                // Refetch to update UI
-                refetch();
+                // Update query cache directly by prepending older messages
+                queryClient.setQueryData(['messages', id], (oldData: unknown) => {
+                    if (!oldData || typeof oldData !== 'object') return oldData;
+                    const currentData = oldData as {
+                        messages?: Message[];
+                        session?: unknown;
+                        hasMore?: boolean;
+                        nextCursor?: string | null;
+                    };
+
+                    const updated = {
+                        ...currentData,
+                        messages: [...messagesWithSessionId, ...(currentData.messages || [])],
+                        hasMore: data.hasMore,
+                        nextCursor: data.nextCursor
+                    };
+
+                    return updated;
+                });
             }
         } catch (error) {
             console.error('Failed to load more messages:', error);

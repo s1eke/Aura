@@ -41,7 +41,6 @@ export default function MessageList({
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const isFirstScroll = useRef(true);
-    const prevScrollHeight = useRef(0);
 
     // 橡皮筋回弹效果状态
     const [bounceOffset, setBounceOffset] = useState(0);
@@ -140,15 +139,33 @@ export default function MessageList({
     }, [messages, isReady]); // Include full messages array since we access messages[messages.length - 1]
 
     // 加载更多消息时保持滚动位置
-    useLayoutEffect(() => {
-        if (containerRef.current && prevScrollHeight.current > 0) {
-            const newScrollHeight = containerRef.current.scrollHeight;
-            const scrollDiff = newScrollHeight - prevScrollHeight.current;
+    // 使用锚点消息 ID 来定位
+    const anchorMessageIdRef = useRef<string | null>(null);
 
-            if (scrollDiff > 0) {
-                containerRef.current.scrollTop += scrollDiff;
-            }
-            prevScrollHeight.current = 0;
+    useLayoutEffect(() => {
+        if (!anchorMessageIdRef.current || messages.length === 0 || !containerRef.current) return;
+
+
+        // 找到锚点消息对应的 DOM 元素
+        const anchorElement = document.querySelector(`[data-message-id="${anchorMessageIdRef.current}"]`);
+        if (anchorElement) {
+            // 计算锚点元素相对于容器的位置
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const anchorRect = anchorElement.getBoundingClientRect();
+
+            // 计算需要的 scrollTop 值（锚点应该在容器顶部）
+            const relativeTop = anchorRect.top - containerRect.top;
+            const currentScrollTop = containerRef.current.scrollTop;
+            const targetScrollTop = currentScrollTop + relativeTop;
+
+
+            // 直接设置 scrollTop，无动画，在浏览器绘制前完成
+            containerRef.current.scrollTop = targetScrollTop;
+
+            anchorMessageIdRef.current = null;
+        } else {
+            console.warn('[MessageList] Anchor element not found:', anchorMessageIdRef.current);
+            anchorMessageIdRef.current = null;
         }
     }, [messages]);
 
@@ -260,6 +277,7 @@ export default function MessageList({
 
     // Debounced scroll handler to prevent excessive load more calls
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const hasTriggeredLoadMore = useRef(false);
 
     const handleScroll = () => {
         // Clear previous timeout
@@ -271,12 +289,50 @@ export default function MessageList({
         scrollTimeoutRef.current = setTimeout(() => {
             if (containerRef.current && onLoadMore && hasMore && !loadingMore) {
                 const { scrollTop } = containerRef.current;
+                // Trigger when scrolled near the top (within 500px from top)
+                // This allows preloading before user reaches the top
+                if (scrollTop < 500 && !hasTriggeredLoadMore.current) {
+                    hasTriggeredLoadMore.current = true;
 
-                // Only trigger when scrolled near the top (100px from top)
-                // Don't trigger if already at the very top (scrollTop < 1) to prevent infinite loops
-                if (scrollTop > 1 && scrollTop < 100) {
-                    prevScrollHeight.current = containerRef.current.scrollHeight;
+                    // Find the first currently visible message as anchor
+                    // Prefer message with top closest to container top (messageTop near 0)
+                    if (messages.length > 0 && containerRef.current) {
+                        const containerRect = containerRef.current.getBoundingClientRect();
+                        const containerTop = containerRect.top;
+
+                        // Find message whose top is closest to container top
+                        let bestAnchor: { id: string; distance: number; messageTop: number } | null = null;
+
+                        for (const message of messages) {
+                            const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
+                            if (messageElement) {
+                                const messageRect = messageElement.getBoundingClientRect();
+                                const messageTop = messageRect.top - containerTop;
+
+                                // Only consider messages that are at least partially visible
+                                // (top is at or below container top, and bottom is below container top)
+                                if (messageTop <= 50 && messageRect.bottom > containerTop) {
+                                    const distance = Math.abs(messageTop);
+
+                                    if (!bestAnchor || distance < bestAnchor.distance) {
+                                        bestAnchor = { id: message.id, distance, messageTop };
+                                    }
+                                }
+                            }
+                        }
+
+                        if (bestAnchor) {
+                            anchorMessageIdRef.current = bestAnchor.id;
+                        } else {
+                            // Fallback to first message if none found
+                            anchorMessageIdRef.current = messages[0].id;
+                        }
+                    }
+
                     onLoadMore();
+                } else if (scrollTop >= 400) {
+                    // Reset flag when scrolled away from trigger zone
+                    hasTriggeredLoadMore.current = false;
                 }
             }
         }, 100); // 100ms debounce
@@ -306,7 +362,7 @@ export default function MessageList({
                 display: 'flex',
                 flexDirection: 'column',
                 WebkitOverflowScrolling: 'touch',
-                overflowAnchor: 'none', // Prevent browser scroll anchoring interference
+                overflowAnchor: 'auto', // Enable scroll anchoring to preserve position
                 // scrollBehavior: isReady ? 'smooth' : 'auto', // Auto during init, smooth after
                 // opacity: isReady ? 1 : 0, // Parent now handles visibility
             }}
@@ -341,35 +397,36 @@ export default function MessageList({
                     <>
                         <div style={{ padding: '8px 0' }}>
                             {messages.map((message) => (
-                                <MessageBubble
-                                    key={message.id}
-                                    content={message.content}
-                                    role={message.role}
-                                    userAvatar={userAvatar}
-                                    personaAvatar={personaAvatar}
-                                    personaId={personaId}
-                                    myColors={myColors}
-                                    otherColors={otherColors}
-                                    imageUrl={message.imageUrl}
-                                    createdAt={message.createdAt}
-                                    status={message.status}
-                                    onImageLoad={() => {
-                                        // 图片加载处理
-                                        if (containerRef.current) {
-                                            const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-                                            const isNearBottom = scrollHeight - scrollTop - clientHeight < 150; // 150px threshold
-                                            const isUserSending = message.role === 'user' && message.status === 'sending';
+                                <div key={message.id} data-message-id={message.id}>
+                                    <MessageBubble
+                                        content={message.content}
+                                        role={message.role}
+                                        userAvatar={userAvatar}
+                                        personaAvatar={personaAvatar}
+                                        personaId={personaId}
+                                        myColors={myColors}
+                                        otherColors={otherColors}
+                                        imageUrl={message.imageUrl}
+                                        createdAt={message.createdAt}
+                                        status={message.status}
+                                        onImageLoad={() => {
+                                            // 图片加载处理
+                                            if (containerRef.current) {
+                                                const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+                                                const isNearBottom = scrollHeight - scrollTop - clientHeight < 150; // 150px threshold
+                                                const isUserSending = message.role === 'user' && message.status === 'sending';
 
-                                            if (isReady && (isNearBottom || isUserSending) && bottomRef.current) {
-                                                // 只有当用户已经在底部附近，或者正在发送新消息时，才跟随图片加载滚动到底部
-                                                bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                                            } else if (!isReady && bottomRef.current) {
-                                                // 如果未准备好（初始加载），则立即固定到底部
-                                                containerRef.current.scrollTop = containerRef.current.scrollHeight;
+                                                if (isReady && (isNearBottom || isUserSending) && bottomRef.current) {
+                                                    // 只有当用户已经在底部附近，或者正在发送新消息时，才跟随图片加载滚动到底部
+                                                    bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                                                } else if (!isReady && bottomRef.current) {
+                                                    // 如果未准备好（初始加载），则立即固定到底部
+                                                    containerRef.current.scrollTop = containerRef.current.scrollHeight;
+                                                }
                                             }
-                                        }
-                                    }}
-                                />
+                                        }}
+                                    />
+                                </div>
                             ))}
                         </div>
                         <div ref={bottomRef} />
