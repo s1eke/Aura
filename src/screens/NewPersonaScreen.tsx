@@ -78,8 +78,10 @@ export default function NewPersonaScreen() {
 
             const data = await res.json();
 
-            // Invalidate sessions query to refresh the list
-            queryClient.invalidateQueries({ queryKey: queryKeys.sessions });
+            // Invalidate sessions and personas queries to refresh the list
+            [queryKeys.sessions, queryKeys.personas].forEach(key =>
+                queryClient.invalidateQueries({ queryKey: key })
+            );
 
             if (data.sessionId) {
                 navigate(`/chat/${data.sessionId}`);

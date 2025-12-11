@@ -64,12 +64,13 @@ export default function ChatSettingsScreen() {
                 const { clearSessionMessages } = await import('@/lib/indexedDB');
                 if (id) await clearSessionMessages(id);
 
-                // Invalidate queries
+                // Invalidate and refetch queries immediately
                 if (id) {
-                    queryClient.invalidateQueries({ queryKey: queryKeys.messages(id) });
-                    queryClient.invalidateQueries({ queryKey: queryKeys.session(id) });
+                    // Use refetchQueries to immediately update with empty data
+                    await queryClient.refetchQueries({ queryKey: queryKeys.messages(id) });
+                    await queryClient.refetchQueries({ queryKey: queryKeys.session(id) });
                 }
-                queryClient.invalidateQueries({ queryKey: queryKeys.sessions });
+                await queryClient.refetchQueries({ queryKey: queryKeys.sessions });
 
                 // Reload page or navigate home
                 navigate('/', { replace: true });
