@@ -162,7 +162,12 @@ export default function PersonaManagementScreen() {
                                         alt={persona.name}
                                         width={48}
                                         height={48}
-                                        style={{ objectFit: 'cover' }}
+                                        style={{
+                                            objectFit: 'cover',
+                                            display: 'block',
+                                            width: '100%',
+                                            height: '100%'
+                                        }}
                                     />
                                 </div>
 
