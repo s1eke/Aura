@@ -279,6 +279,13 @@ export default function MessageList({
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const hasTriggeredLoadMore = useRef(false);
 
+    // Reset the trigger flag when loading completes
+    useEffect(() => {
+        if (!loadingMore) {
+            hasTriggeredLoadMore.current = false;
+        }
+    }, [loadingMore]);
+
     const handleScroll = () => {
         // Clear previous timeout
         if (scrollTimeoutRef.current) {
@@ -330,10 +337,8 @@ export default function MessageList({
                     }
 
                     onLoadMore();
-                } else if (scrollTop >= 400) {
-                    // Reset flag when scrolled away from trigger zone
-                    hasTriggeredLoadMore.current = false;
                 }
+                // Note: No manual reset needed here - useEffect handles it when loadingMore changes
             }
         }, 100); // 100ms debounce
     };

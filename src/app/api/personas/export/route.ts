@@ -186,6 +186,12 @@ export async function POST(request: NextRequest) {
             throw err;
         });
 
+        // Collect chunks as they are generated
+        const chunks: Uint8Array[] = [];
+        archive.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
+
         // Add persona.json
         archive.append(JSON.stringify(exportData, null, 2), {
             name: 'persona.json'
@@ -223,8 +229,15 @@ export async function POST(request: NextRequest) {
             logger.info(`[Persona Export] Added ${imageFiles.length} images`);
         }
 
-        // Finalize the archive
+        logger.info('[Persona Export] Finalizing archive...');
+
+        // Finalize the archive and wait for completion
         await archive.finalize();
+
+        logger.info('[Persona Export] Archive finalized, creating buffer...');
+
+        // Convert chunks to buffer
+        const buffer = Buffer.concat(chunks);
 
         // Generate filename
         const timestamp = new Date().toISOString()
@@ -232,13 +245,6 @@ export async function POST(request: NextRequest) {
             .replace(/\..+/, '')
             .replace(/:/g, '-');
         const filename = `${persona.name}_${timestamp}.zip`;
-
-        // Convert archive to buffer for NextResponse
-        const chunks: Uint8Array[] = [];
-        for await (const chunk of archive) {
-            chunks.push(chunk);
-        }
-        const buffer = Buffer.concat(chunks);
 
         logger.info(`[Persona Export] Successfully exported persona ${persona.name} (${buffer.length} bytes)`);
 
