@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faExpand, faArrowsAltH, faTh, faCompress } from '@fortawesome/free-solid-svg-icons';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { getAvatarUrl } from '@/lib/avatar';
 
 type BgMode = 'cover' | 'contain' | 'stretch' | 'tile' | 'center';
 
@@ -12,6 +13,7 @@ interface BackgroundEditorProps {
     onCancel: () => void;
     userAvatar?: string;
     personaAvatar?: string;
+    personaId?: string;
     initialMode?: string;
     // 气泡颜色设置
     myBubble?: {
@@ -30,6 +32,7 @@ export default function BackgroundEditor({
     onCancel,
     userAvatar,
     personaAvatar,
+    personaId,
     initialMode = 'cover',
     myBubble = { background: '#95ec69', text: '#000' },
     personaBubble = { background: '#fff', text: '#000' }
@@ -165,13 +168,23 @@ export default function BackgroundEditor({
                 }}>
                     {/* 对方消息 */}
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <Image
-                            src={personaAvatar || '/default-avatar.png'}
-                            alt="Persona avatar"
-                            width={40}
-                            height={40}
-                            style={{ borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0, objectFit: 'cover' }}
-                        />
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            flexShrink: 0,
+                            borderRadius: '4px',
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            overflow: 'hidden',
+                            position: 'relative'
+                        }}>
+                            <Image
+                                src={getAvatarUrl(personaAvatar, personaId || 'persona', 'persona')}
+                                alt="Persona avatar"
+                                fill
+                                unoptimized
+                                style={{ objectFit: 'cover' }}
+                            />
+                        </div>
                         <div style={{
                             background: personaBubble.background,
                             color: personaBubble.text,
@@ -200,13 +213,23 @@ export default function BackgroundEditor({
                         }}>
                             这个模式挺合适的！
                         </div>
-                        <Image
-                            src={userAvatar || '/default-avatar.png'}
-                            alt="User avatar"
-                            width={40}
-                            height={40}
-                            style={{ borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0, objectFit: 'cover' }}
-                        />
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            flexShrink: 0,
+                            borderRadius: '4px',
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            overflow: 'hidden',
+                            position: 'relative'
+                        }}>
+                            <Image
+                                src={getAvatarUrl(userAvatar, 'user', 'user')}
+                                alt="User avatar"
+                                fill
+                                unoptimized
+                                style={{ objectFit: 'cover' }}
+                            />
+                        </div>
                     </div>
                 </div>
 

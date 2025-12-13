@@ -604,6 +604,7 @@ export default function ChatSettingsScreen() {
                     imageUrl={uploadedImageUrl}
                     userAvatar={session?.user?.avatar || undefined}
                     personaAvatar={session?.persona?.avatar || undefined}
+                    personaId={session?.personaId || session?.persona?.id}
                     initialMode={session?.bgMode || 'cover'}
                     // 传递气泡颜色
                     myBubble={{
