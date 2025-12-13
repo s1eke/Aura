@@ -4,7 +4,15 @@
 
 Aura 是一个基于 Next.js 16 和 React 19 构建的客制化属性较强的 AI 聊天软件。
 
-![Chat Screen](public/screenshots/chat-screen.png)
+## 📸 界面截图
+
+| 消息列表 | 聊天界面 | 朋友圈 |
+|:---:|:---:|:---:|
+| ![消息列表](public/screenshots/messages-screen.png) | ![聊天界面](public/screenshots/chat-screen.png) | ![朋友圈](public/screenshots/moments-screen.png) |
+
+| 创建角色 | 设置页面 | 气泡设置 |
+|:---:|:---:|:---:|
+| ![创建角色](public/screenshots/personas-new-screen.png) | ![设置页面](public/screenshots/settings-screen.png) | ![气泡设置](public/screenshots/settings-bubble-screen.png) |
 
 ## 🚀 开发环境运行 (Development)
 

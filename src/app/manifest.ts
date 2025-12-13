@@ -14,18 +14,46 @@ export default function manifest(): MetadataRoute.Manifest {
         prefer_related_applications: false,
         screenshots: [
             {
+                src: '/screenshots/messages-screen.png',
+                sizes: '800x1734',
+                type: 'image/png',
+                form_factor: 'narrow',
+                label: '消息列表'
+            },
+            {
                 src: '/screenshots/chat-screen.png',
                 sizes: '800x1734',
                 type: 'image/png',
-                form_factor: 'narrow', // 手机竖屏
-                label: 'Chat interface with AI persona'
+                form_factor: 'narrow',
+                label: '聊天界面'
+            },
+            {
+                src: '/screenshots/moments-screen.png',
+                sizes: '800x1734',
+                type: 'image/png',
+                form_factor: 'narrow',
+                label: '朋友圈'
+            },
+            {
+                src: '/screenshots/personas-new-screen.png',
+                sizes: '800x1734',
+                type: 'image/png',
+                form_factor: 'narrow',
+                label: '创建角色'
             },
             {
                 src: '/screenshots/settings-screen.png',
                 sizes: '800x1734',
                 type: 'image/png',
                 form_factor: 'narrow',
-                label: 'Customizable chat settings'
+                label: '设置页面'
+            },
+            {
+                src: '/screenshots/settings-bubble-screen.png',
+                sizes: '800x1734',
+                type: 'image/png',
+                form_factor: 'narrow',
+                label: '气泡设置'
             }
         ],
         icons: [
